@@ -1,0 +1,23 @@
+﻿@using WeatherInTheCity.Client.Components.Layout
+@inherits LayoutComponentBase
+@layout BaseLayout
+
+<MudLayout>
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="d-flex flex-column mx-auto px-5 w-max" Style="min-height: 100vh">
+
+        <div class="mt-10 mt-sm-20 mb-4 d-flex flex-column gap-3 align-content-center justify-space-between flex-sm-row">
+            <div class="d-flex justify-center">
+                <MudLink Href="/" Color="Color.Default" Typo="Typo.h4" Underline="Underline.None" Style="text-align: center">Weather In The City</MudLink>
+            </div>
+            <div class="d-flex flex-row flex-wrap gap-5 align-content-center justify-center gap-sm-4 align-content-sm-end">
+                <MudLink Href="/cities" Color="Color.Default" Typo="Typo.h6">Cities</MudLink>
+                <MudLink Href="/export" Color="Color.Default" Typo="Typo.h6">Export</MudLink>
+                
+            </div>
+        </div>
+        <div class="d-flex flex-column flex-auto mt-5 mt-sm-10 mb-5 mb-sm-5">
+            @Body
+        </div>
+
+    </MudContainer>
+</MudLayout>

@@ -1,0 +1,63 @@
+name: weather-in-the-city-prod
+
+networks:
+  weather-in-the-city-prod:
+  caddy:
+    external: true
+
+volumes:
+  seq-data:
+  postgres-data:
+
+services:
+  seq:
+    image: datalust/seq:2024.3
+    container_name: weather-in-the-city-prod.seq
+    networks:
+      - weather-in-the-city-prod
+      - caddy
+    volumes:
+      - seq-data:/data
+    environment:
+      ACCEPT_EULA: Y
+      SEQ_FEATURES_ENABLED: true
+      SEQ_FIRSTRUN_ADMINUSERNAME: ${SEQ_FIRSTRUN_ADMINUSERNAME}
+      SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_FIRSTRUN_ADMINPASSWORD}
+    restart: always
+  
+  postgres:
+    image: postgres:17
+    container_name: weather-in-the-city-prod.postgres
+    networks:
+      - weather-in-the-city-prod
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    restart: always
+
+  app:
+    image: weather-in-the-city-prod.app
+    container_name: weather-in-the-city-prod.app
+    pull_policy:
+      build
+    build:
+      context: ../
+      dockerfile: src/WeatherInTheCity/Dockerfile
+      args:
+        BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      CitiesDbOptions:ConnectionString: ${CITIES_DB}
+      SeqOptions:ApiKey: ${SEQ_API_KEY}
+      SeqOptions:Host: ${SEQ_HOST}
+      HygraphOptions:Endpoint: ${CMS_ENDPOINT}
+      HygraphOptions:Pat: ${CMS_API_KEY}
+      SendGridOptions:Key: ${SEND_GRID_KEY}
+      SendGridOptions:EmailFrom: ${SEND_GRID_EMAIL_FROM}
+      OpenAIOptions:ApiKey: ${OPENAI_API_KEY}
+    networks:
+      - weather-in-the-city-prod
+      - caddy
+    restart: always

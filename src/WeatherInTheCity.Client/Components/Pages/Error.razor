@@ -1,0 +1,21 @@
+﻿@page "/error"
+@using WeatherInTheCity.Client.Components.Layout
+@layout ErrorLayout
+
+<PageTitle>Error</PageTitle>
+
+<div class="d-flex justify-center" style="min-height: 100vh">
+    <div class="d-flex flex-column align-content-center gap-4" style="margin-top: 30vh;">
+        <MudText Typo="Typo.h3" Align="Align.Center">Error</MudText>
+
+        <MudText Typo="Typo.h5" Align="Align.Center">An error occurred while processing your request.</MudText>
+
+        <div class="d-flex justify-center" style="width: fit-content; align-self: center;">
+            <MudButton Color="Color.Error" Variant="Variant.Filled" Href="/">Reload Page</MudButton>
+        </div>
+    </div>
+</div>
+
+@code {
+    
+}

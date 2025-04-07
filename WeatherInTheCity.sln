@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherInTheCity", "src\WeatherInTheCity\WeatherInTheCity.csproj", "{53F754FE-DD44-46B8-B198-986616D5797F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherInTheCity.Client", "src\WeatherInTheCity.Client\WeatherInTheCity.Client.csproj", "{8AE880A1-7E24-4F4E-ADF2-7AD4E339699B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".env", ".env", "{BBBBDB92-F018-495A-BEE6-35BB78E5DBF9}"
+	ProjectSection(SolutionItems) = preProject
+		.env\.example_prod.env = .env\.example_prod.env
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "compose", "compose", "{CB808E0A-0B26-4C5E-BC19-036868DDA3B1}"
+	ProjectSection(SolutionItems) = preProject
+		compose\compose-services-dev.yaml = compose\compose-services-dev.yaml
+		compose\compose-services-prod.yaml = compose\compose-services-prod.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{94E13E52-92BE-4AE7-9E4C-E25DEB5FD800}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		global.json = global.json
+		README.md = README.md
+		WeatherInTheCity.sln = WeatherInTheCity.sln
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53F754FE-DD44-46B8-B198-986616D5797F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53F754FE-DD44-46B8-B198-986616D5797F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53F754FE-DD44-46B8-B198-986616D5797F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53F754FE-DD44-46B8-B198-986616D5797F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AE880A1-7E24-4F4E-ADF2-7AD4E339699B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AE880A1-7E24-4F4E-ADF2-7AD4E339699B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AE880A1-7E24-4F4E-ADF2-7AD4E339699B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AE880A1-7E24-4F4E-ADF2-7AD4E339699B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

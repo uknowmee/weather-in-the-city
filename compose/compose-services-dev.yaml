@@ -1,0 +1,56 @@
+name: weather-in-the-city
+
+networks:
+  weather-in-the-city:
+
+volumes:
+  seq-data:
+  postgres-data:
+
+services:
+  seq:
+    image: datalust/seq:2024.3
+    container_name: weather-in-the-city.seq
+    networks:
+      - weather-in-the-city
+    ports:
+      - "5341:80"
+    volumes:
+      - seq-data:/data
+    environment:
+      ACCEPT_EULA: Y
+    restart: unless-stopped
+    
+  postgres:
+    image: postgres:17
+    container_name: weather-in-the-city.postgres
+    networks:
+      - weather-in-the-city
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgrespw}
+    restart: unless-stopped
+
+  app:
+    image: weather-in-the-city.app
+    container_name: weather-in-the-city.app
+    pull_policy:
+      build
+    build:
+      context: ../
+      dockerfile: src/WeatherInTheCity/Dockerfile
+      args:
+        BUILD_CONFIGURATION: ${BUILD_CONFIGURATION:-Debug}
+    env_file:
+      - ../src/WeatherInTheCity/.local.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+    ports:
+      - "8080:8080"
+    networks:
+      - weather-in-the-city
+    restart: unless-stopped

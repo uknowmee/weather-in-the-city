@@ -1,0 +1,16 @@
+﻿@inject NavigationManager NavigationManager
+
+<ErrorBoundary>
+    <ChildContent>
+        @ChildContent
+    </ChildContent>
+
+    <ErrorContent>
+        @{ NavigationManager.NavigateTo($"error", forceLoad: true); }
+    </ErrorContent>
+</ErrorBoundary>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; } = null!;
+
+}

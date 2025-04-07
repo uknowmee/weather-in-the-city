@@ -1,0 +1,43 @@
+﻿@inject IHostEnvironment Env
+
+@if (Env.IsDevelopment() is false)
+{
+    <HeadContent>
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    </HeadContent>
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <base href="/"/>
+    <link rel="stylesheet" href="@Assets["app.css"]"/>
+    <link rel="stylesheet" href="@Assets["WeatherInTheCity.styles.css"]"/>
+
+    <link rel="stylesheet" href="@Assets["MudBlazor.min.css"]"/>
+    @* <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" /> *@
+    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    
+    <ImportMap/>
+    <link rel="icon" type="image/png" href="images/dotnet.svg"/>
+    <HeadOutlet/>
+
+    <title>Weather In The City</title>
+    
+    @if (Env.IsDevelopment() is false)
+    {
+        <script defer src="https://umami.dev.uknowmee.com/script.js" data-website-id="a3b04917-8586-48c3-9786-f455bd9b99b4"></script>
+    }
+</head>
+
+<body>
+<Routes/>
+<script src="_framework/blazor.web.js"></script>
+<script src="_content/MudBlazor/MudBlazor.min.js"></script>
+</body>
+
+</html>
