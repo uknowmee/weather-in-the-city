@@ -1,0 +1,56 @@
+﻿@page "/other/projects"
+@using WeatherInTheCity.Client.Extensions
+@using WeatherInTheCity.Cms
+
+@inject ICmsService CmsService
+
+<PageTitle>Projects - Michał Pałucki</PageTitle>
+
+<MudGrid>
+    @foreach (var project in _projects)
+    {
+        <MudItem Class="d-flex flex-auto" xs="12" sm="6">
+            <MudCard Class="flex-grow-1">
+                @if (project.Img is not null)
+                {
+                    <MudCardMedia Image="@project.Img.Url" Height="200"/>
+                }
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Class="mb-4 align-content-center">
+                        @project.Name<a class="mud-typography-subtitle2">, @project.Year</a>
+                    </MudText>
+                    <div class="d-flex flex-column gap-5">
+                        @project.Content.Html.AddStyles(_tagStyles).AsRenderFragment()
+                    </div>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               EndIcon="@Icons.Material.Filled.ArrowForward"
+                               Href="@project.GitLink"
+                               Target="_blank"
+                               data-umami-event="@($"click_git_project_{project.Name.ToLower().Replace(" ", "-")}")">
+                        GitHub
+                    </MudButton>
+                    <MudSpacer/>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+
+    private readonly Dictionary<string, string> _tagStyles = new()
+    {
+        { "<p>", """<p class="mud-typography mud-typography-body2">""" }
+    };
+
+    private IEnumerable<Project> _projects = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _projects = await CmsService.GetProjects();
+    }
+
+}

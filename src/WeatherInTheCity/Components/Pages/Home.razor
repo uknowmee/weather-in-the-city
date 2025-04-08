@@ -1,9 +1,20 @@
 ﻿@page "/"
+@using WeatherInTheCity.Client.Extensions
+@using WeatherInTheCity.Cms
+
+@inject ICmsService CmsService
 
 <div class="d-flex flex-auto flex-column">
-    <p class="pb-2 pb-sm-3 mud-typography-subtitle1" style="text-align: justify">
-        Weather in the cities!
-    </p>
+    @_about?.Content.Html.AddStyles(_tagStyles).AsRenderFragment()
+    @if (_about?.KeyFeatures?.Html is not null)
+    {
+        <div class="mt-2 mt-sm-4">
+            <h3 class="mud-typography mud-typography-h5">Key Features:</h3>
+            <div class="px-4 mt-1 mt-sm-3">
+                @_about?.KeyFeatures?.Html.AddStyles(_tagStyles).AsRenderFragment()
+            </div>
+        </div>
+    }
 </div>
 
 <div>
@@ -33,3 +44,41 @@
         </MudLink>
     </div>
 </div>
+
+@code {
+
+    private readonly Dictionary<string, string> _tagStyles = new()
+    {
+        { "<p>", """<p class="mud-typography mud-typography-body1 mb-4">""" },
+        { "<h3>", """<h3 class="mud-typography mud-typography-h3">""" },
+        { "<h6>", """<h6 class="mud-typography mud-typography-h6">""" },
+        { "<strong>", """<strong class="mud-typography mud-typography-h5">""" }
+    };
+
+    private About? _about;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _about = await CmsService.GetAppAbout();
+    }
+
+}
+
+<style>
+    ul {
+        list-style-type: circle;
+        margin-top: 10px;
+    }
+
+    li {
+        margin-bottom: 10px;
+    }
+
+    div > ul > li {
+        padding-left: 15px;
+    }
+
+    div > ul > li > div {
+        font-size: 0.8rem;
+    }
+</style>
