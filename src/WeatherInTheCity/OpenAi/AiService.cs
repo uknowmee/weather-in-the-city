@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 using Microsoft.Extensions.Options;
 using OpenAI;
 using OpenAI.Chat;
@@ -7,7 +8,7 @@ namespace WeatherInTheCity.OpenAi;
 
 public interface IAiService
 {
-    IAsyncEnumerable<string> GetCityDescriptionAsync(string cityName);
+    IAsyncEnumerable<string> GetCityDescriptionAsync(string cityName, CancellationToken token = default);
 }
 
 public class AiService : IAiService
@@ -21,8 +22,10 @@ public class AiService : IAiService
         _chatClient = openAiService.GetChatClient(options.Value.Model);
     }
     
-    public async IAsyncEnumerable<string> GetCityDescriptionAsync(string cityName)
+    public async IAsyncEnumerable<string> GetCityDescriptionAsync(string cityName, [EnumeratorCancellation] CancellationToken token = default)
     {
+        _logger.LogInformation("Generating description for {CityName}", cityName);
+        
         var messages = new List<ChatMessage>
         {
             new SystemChatMessage("Generate description about given city. It should be 3-5 sentences long."),
@@ -30,7 +33,7 @@ public class AiService : IAiService
         };
         
         var stringBuilder = new StringBuilder();
-        var response = _chatClient.CompleteChatStreamingAsync(messages);
+        var response = _chatClient.CompleteChatStreamingAsync(messages, cancellationToken: token);
         
         await foreach (var completionUpdate in response)
         {

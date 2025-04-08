@@ -24,7 +24,7 @@
     
     <ImportMap/>
     <link rel="icon" type="image/png" href="images/dotnet.svg"/>
-    <HeadOutlet/>
+    <HeadOutlet @rendermode="@(new InteractiveServerRenderMode(false))" />
 
     <title>Weather In The City</title>
     
@@ -35,7 +35,7 @@
 </head>
 
 <body>
-<Routes/>
+<Routes @rendermode="@(new InteractiveServerRenderMode(false))" />
 <script src="_framework/blazor.web.js"></script>
 <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 </body>

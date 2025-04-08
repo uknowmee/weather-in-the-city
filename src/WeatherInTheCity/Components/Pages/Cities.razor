@@ -1,7 +1,327 @@
 @page "/cities"
+@using System.ComponentModel.DataAnnotations
+@using System.Globalization
+@using Microsoft.EntityFrameworkCore
+@using WeatherInTheCity.CitiesDb
+@using WeatherInTheCity.OpenAi
+@using WeatherInTheCity.Weather
 
-<h3>Cities</h3>
+@inject ISnackbar Snackbar
+@inject CtxCitiesDb CtxCitiesDb
+@inject ILogger<Cities> Logger
+@inject IAiService AiService
+@inject IWeatherService WeatherService
+
+@rendermode InteractiveServer
+
+<MudDataGrid
+    T="City"
+    Items="_cities"
+    Height="70vh" Hover="true" Elevation="10"
+    MultiSelection="false" ShowColumnOptions="false"
+    Filterable="true" SortMode="SortMode.Multiple" QuickFilter="QuickFilter"
+    ReadOnly="false"
+    EditMode="DataGridEditMode.Form" EditTrigger="DataGridEditTrigger.Manual" EditDialogOptions="@(new DialogOptions { CloseOnEscapeKey = true })"
+    StartedEditingItem="StartedEditingCity" CanceledEditingItem="CanceledEditingCity" CommittedItemChanges="CommittedCityChanges"
+    Class="d-flex flex-column">
+
+    <ToolBarContent>
+        <div class="d-flex flex-row gap-3 justify-space-between mud-width-full">
+            <MudText Typo="Typo.h6">Cities</MudText>
+            <div class="d-flex flex-row gap-3">
+                <MudTextField
+                    @bind-Value="_searchString"
+                    Placeholder="Search"
+                    Adornment="Adornment.Start"
+                    Immediate="true"
+                    AdornmentIcon="@Icons.Material.Filled.Search"
+                    IconSize="Size.Medium"
+                    Class="mt-0"/>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddNewCity">Add City</MudButton>
+            </div>
+        </div>
+    </ToolBarContent>
+
+    <Columns>
+        <HierarchyColumn T="City" ButtonDisabledFunc="@(city => string.IsNullOrWhiteSpace(city.Name))"/>
+
+        <PropertyColumn Property="x => x.Name" Title="Name"/>
+
+        <PropertyColumn Property="x => x.Population" Title="Population" Format="{0:N0}">
+            <CellTemplate>
+                @context.Item.Population.ToString("N0", CultureInfo.InvariantCulture)
+            </CellTemplate>
+        </PropertyColumn>
+
+        <TemplateColumn Title="Capital"
+                        Sortable="true"
+                        SortBy="x => x.IsCapital"
+                        Editable="true">
+            <CellTemplate>
+                <MudCheckBox @bind-Value="context.Item.IsCapital" ReadOnly="true"/>
+            </CellTemplate>
+            <EditTemplate>
+                <div class="d-flex flex-row mt-1 mb-1">
+                    <MudText Class="center align-content-center">Is Capital?</MudText>
+                    <MudCheckBox @bind-Value="context.Item.IsCapital"/>
+                </div>
+            </EditTemplate>
+        </TemplateColumn>
+
+        <PropertyColumn Property="x => x.FoundationDate" Filterable="false" Format="@DateFormat" Title="Foundation">
+            <EditTemplate>
+                <MudDatePicker
+                    MinDate="@(new DateTime(1, 1, 1))"
+                    MaxDate="DateTime.Now"
+                    DateFormat="@DateFormat"
+                    ShowToolbar="false"
+                    Editable="true"
+                    Placeholder="@DateFormat"
+                    @bind-Date="@context.Item.FoundationDateTime"/>
+            </EditTemplate>
+        </PropertyColumn>
+
+        <div class="d-flex flex-row justify-end">
+            <TemplateColumn>
+                <CellTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync"/>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn>
+                <CellTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteCityAsync(context.Item)" Color="Color.Error"/>
+                </CellTemplate>
+            </TemplateColumn>
+        </div>
+
+    </Columns>
+
+    <ChildRowContent>
+        <MudCard>
+            <MudCardHeader Class="py-1">
+                <CardHeaderContent>
+                    <div class="d-flex flex-row justify-space-between">
+                        <MudText Typo="Typo.h6">@context.Item.Name</MudText>
+                        <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Filled.Refresh" OnClick="_ => OnFetchExternalDataAsync(context.Item)" Color="Color.Primary"/>
+                    </div>
+                </CardHeaderContent>
+            </MudCardHeader>
+
+            <MudCardContent Class="py-2">
+                <div class="d-flex flex-column gap-4">
+                    @if (context.Item.Description.Count == 0)
+                    {
+                        <MudText Typo="Typo.body1">No description available.</MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body1">
+                            @foreach (var part in context.Item.Description)
+                            {
+                                @part
+                            }
+                        </MudText>
+                    }
+                    <div>
+                        @if (context.Item.CurrentCondition is not null)
+                        {
+                            <MudText>Current Weather conditions:</MudText>
+                            <div class="pl-5 pt-2">
+                                <MudText>Temperature: @context.Item.CurrentCondition.TempC °C</MudText>
+                                <MudText>Weather: @context.Item.CurrentCondition.WeatherDescription.FirstOrDefault()?.Value</MudText>
+                                <MudText>Humidity: @context.Item.CurrentCondition.Humidity %</MudText>
+                                <MudText>Wind Speed: @context.Item.CurrentCondition.WindSpeedKmph km/h</MudText>
+                                <MudText>Feels Like: @context.Item.CurrentCondition.FeelsLikeC °C</MudText>
+
+                                <MudText>Local Observation Time: @context.Item.CurrentCondition.LocalObservationTime</MudText>                                
+                                <MudText>Last Update: @context.Item.CurrentCondition.LastUpdate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</MudText>                                
+                            </div>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body1">No current condition available.</MudText>
+                        }
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </ChildRowContent>
+    
+    <PagerContent>
+        <MudDataGridPager T="City"/>
+    </PagerContent>
+
+</MudDataGrid>
 
 @code {
+    private List<City> _cities = [];
     
+    private City? _editingCity;
+
+    private string _searchString = "";
+
+    private Func<City, bool> QuickFilter => city =>
+        string.IsNullOrWhiteSpace(_searchString) ||
+        city.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
+        (_searchString.Contains("capi", StringComparison.OrdinalIgnoreCase) && city.IsCapital) ||
+        (int.TryParse(_searchString, out var population) && city.Population == population) ||
+        city.FoundationDate?.ToString(DateFormat).Contains(_searchString) is true;
+
+    private const string DateFormat = "yyyy-MM-dd";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _cities = await CtxCitiesDb.Cities.ToListAsync();
+    }
+
+    private async Task AddNewCity()
+    {
+        if (_cities.Any(c => c.Name == ""))
+        {
+            Logger.LogWarning("City already exists. Please fill the name before adding a new one.");
+            Snackbar.Add("Default City already exists. Please fill the name before adding a new one.", Severity.Warning);
+            return;
+        }
+
+        var newCity = City.Default();
+
+        try
+        {
+            await CtxCitiesDb.AddAsync(newCity);
+            await CtxCitiesDb.SaveChangesAsync();
+            _cities.Add(newCity);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Error adding new city");
+            Snackbar.Add("Unexpected error occurred while adding new city.", Severity.Error);
+        }
+    }
+
+    private async Task DeleteCityAsync(City city)
+    {
+        try
+        {
+            CtxCitiesDb.Remove(city);
+            await CtxCitiesDb.SaveChangesAsync();
+            _cities.Remove(city);
+            Logger.LogInformation("City {CityId} deleted successfully", city.CityId);
+            Snackbar.Add("City deleted successfully", Severity.Success);
+        }
+        catch (DbUpdateConcurrencyException e)
+        {
+            Logger.LogError(e, "Concurrency error while deleting city {CityId}", city.CityId);
+            Snackbar.Add("Concurrency error occurred. Data reloaded.", Severity.Error);
+            _cities = await CtxCitiesDb.Cities.ToListAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Error deleting city {CityId}", city.CityId);
+            Snackbar.Add("Unexpected error occurred while deleting city.", Severity.Error);
+        }
+    }
+
+    private void StartedEditingCity(City city)
+    {
+        _editingCity = city.CreateCopy();
+        Logger.LogInformation("Started editing city {CityId}", city.CityId);
+    }
+
+    private void CanceledEditingCity(City city)
+    {
+        if (_editingCity is null)
+        {
+            return;
+        }
+        
+        city.CopyValuesFrom(_editingCity);
+        Logger.LogInformation("Canceled editing city {CityId}", city.CityId);
+        _editingCity = null;
+    }
+
+    private async Task CommittedCityChanges(City city)
+    {
+        try
+        {
+            var validationContext = new ValidationContext(city);
+            var results = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(city, validationContext, results, true);
+            var validationErrors = string.Join(", ", results.Select(r => r.ErrorMessage));
+
+            if (!isValid)
+            {
+                Logger.LogWarning("City validation failed: {ValidationErrors}", validationErrors);
+                Snackbar.Add($"City validation failed: {validationErrors}", Severity.Warning);
+                CanceledEditingCity(city);
+                return;
+            }
+
+            CtxCitiesDb.Update(city);
+            await CtxCitiesDb.SaveChangesAsync();
+            Logger.LogInformation("City changes committed successfully for {CityId}", city.CityId);
+            Snackbar.Add("City changes saved successfully", Severity.Success);
+        }
+        catch (DbUpdateConcurrencyException e)
+        {
+            Logger.LogError(e, "Concurrency error while committing city changes {CityId}", city.CityId);
+            Snackbar.Add("Concurrency error occurred. Data reloaded.", Severity.Error);
+            _cities = await CtxCitiesDb.Cities.ToListAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Error committing city changes {CityId}", city.CityId);
+            Snackbar.Add("Unexpected error occurred while saving city.", Severity.Error);
+        }
+    }
+    
+    private async Task OnFetchExternalDataAsync(City city)
+    {
+        Logger.LogInformation("Fetching external data for city {CityId}", city.CityId);
+        
+        var previousDescription = city.Description;
+        var previousCondition = city.CurrentCondition;
+        
+        city.Description.Clear();
+        city.CurrentCondition = null;
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var token = cts.Token;
+        
+        var descriptionTask = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var word in AiService.GetCityDescriptionAsync(city.Name).WithCancellation(token))
+                {
+                    city.Description.Add(word);
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to fetch description for {CityId}", city.CityId);
+                city.Description = previousDescription;
+            }
+        }, token);
+
+        var weatherTask = Task.Run(async () =>
+        {
+            try
+            {
+                var weather = await WeatherService.GetWeatherAsync(city.Name, token);
+                city.CurrentCondition = weather;
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to fetch weather for {CityId}", city.CityId);
+                city.CurrentCondition = previousCondition;
+            }
+        }, token);
+        
+        await Task.WhenAll(descriptionTask, weatherTask);
+
+        Logger.LogInformation("Fetched external data for city {CityId}", city.CityId);
+    }
 }

@@ -14,4 +14,6 @@ public class CtxCitiesDb : DbContext
     public CtxCitiesDb(DbContextOptions<CtxCitiesDb> options) : base(options)
     {
     }
+    
+    public virtual DbSet<City> Cities { get; set; }
 }
