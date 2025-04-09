@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using WeatherInTheCity.Weather;
 
-namespace WeatherInTheCity.CitiesDb;
+namespace WeatherInTheCity.Cities;
 
 public class City
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WeatherInTheCity.Framework;
 
-namespace WeatherInTheCity.CitiesDb;
+namespace WeatherInTheCity.Cities;
 
 public class CitiesDbOptions : IDatabaseOptions
 {

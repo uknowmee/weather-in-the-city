@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
-using WeatherInTheCity.CitiesDb;
-using WeatherInTheCity.OpenAi;
+using WeatherInTheCity.Ai;
+using WeatherInTheCity.Cities;
 using WeatherInTheCity.Weather;
 
 namespace WeatherInTheCity.Components.Pages;

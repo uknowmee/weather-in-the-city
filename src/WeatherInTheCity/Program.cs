@@ -1,9 +1,9 @@
 using WeatherInTheCity;
-using WeatherInTheCity.CitiesDb;
+using WeatherInTheCity.Ai;
+using WeatherInTheCity.Cities;
 using WeatherInTheCity.Cms;
 using WeatherInTheCity.Framework;
 using WeatherInTheCity.Mail;
-using WeatherInTheCity.OpenAi;
 using WeatherInTheCity.Weather;
 
 var builder = WebApplication.CreateBuilder(args);

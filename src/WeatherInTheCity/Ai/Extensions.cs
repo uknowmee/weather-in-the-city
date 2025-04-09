@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using OpenAI;
 
-namespace WeatherInTheCity.OpenAi;
+namespace WeatherInTheCity.Ai;
 
 public class OpenAiOptions
 {

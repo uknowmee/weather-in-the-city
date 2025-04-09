@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using OpenAI;
 using OpenAI.Chat;
 
-namespace WeatherInTheCity.OpenAi;
+namespace WeatherInTheCity.Ai;
 
 public interface IAiService
 {
