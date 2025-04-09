@@ -9,6 +9,8 @@ namespace WeatherInTheCity.Components.Pages;
 
 public partial class Cities
 {
+    private readonly HashSet<Guid> _showCityDetails = [];
+    private readonly HashSet<Guid> _isFetchingCityInfo = [];
     private List<City> _cities = [];
     private City? _editingCity;
     private string _searchString = "";
@@ -27,7 +29,7 @@ public partial class Cities
         _cities = await CtxCitiesDb.Cities.ToListAsync();
     }
 
-    private async Task AddNewCity()
+    private async Task AddNewCityAsync()
     {
         if (_cities.Any(c => c.Name == ""))
         {
@@ -42,7 +44,7 @@ public partial class Cities
         {
             await CtxCitiesDb.AddAsync(newCity);
             await CtxCitiesDb.SaveChangesAsync();
-            _cities.Add(newCity);
+            _cities.Insert(0, newCity);
         }
         catch (Exception e)
         {
@@ -92,7 +94,7 @@ public partial class Cities
         _editingCity = null;
     }
 
-    private async Task CommittedCityChanges(City city)
+    private async Task CommittedCityChangesAsync(City city)
     {
         try
         {
@@ -127,7 +129,23 @@ public partial class Cities
         }
     }
 
-    private async Task OnFetchExternalDataAsync(City city)
+    private async Task OnHideShowDetailsClickAsync(CellContext<City> context)
+    {
+        await context.Actions.ToggleHierarchyVisibilityForItemAsync();
+        if(_showCityDetails.Add(context.Item.CityId) is false)
+        {
+            _showCityDetails.Remove(context.Item.CityId);
+        }
+        
+        if (_showCityDetails.Contains(context.Item.CityId))
+        {
+            _isFetchingCityInfo.Add(context.Item.CityId);
+            await FetchExternalDataAsync(context.Item);
+            _isFetchingCityInfo.Remove(context.Item.CityId);
+        }
+    }
+    
+    private async Task FetchExternalDataAsync(City city)
     {
         Logger.LogInformation("Fetching external data for city {CityId}", city.CityId);
 

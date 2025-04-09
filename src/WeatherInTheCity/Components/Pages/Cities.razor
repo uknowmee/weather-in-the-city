@@ -20,7 +20,7 @@
     Filterable="true" SortMode="SortMode.Multiple" QuickFilter="QuickFilter"
     ReadOnly="false"
     EditMode="DataGridEditMode.Form" EditTrigger="DataGridEditTrigger.Manual" EditDialogOptions="@(new DialogOptions { CloseOnEscapeKey = true })"
-    StartedEditingItem="StartedEditingCity" CanceledEditingItem="CanceledEditingCity" CommittedItemChanges="CommittedCityChanges"
+    StartedEditingItem="StartedEditingCity" CanceledEditingItem="CanceledEditingCity" CommittedItemChanges="CommittedCityChangesAsync"
     Class="d-flex flex-column">
 
     <ToolBarContent>
@@ -35,13 +35,24 @@
                     AdornmentIcon="@Icons.Material.Filled.Search"
                     IconSize="Size.Medium"
                     Class="mt-0"/>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddNewCity">Add City</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddNewCityAsync">Add City</MudButton>
             </div>
         </div>
     </ToolBarContent>
 
     <Columns>
-        <HierarchyColumn T="City" ButtonDisabledFunc="@(city => string.IsNullOrWhiteSpace(city.Name))"/>
+        <div>
+            <HierarchyColumn T="City" Hidden="true"/>
+            <TemplateColumn T="City">
+                <CellTemplate>
+                    <MudIconButton Size="@Size.Small"
+                                   Icon="@(_showCityDetails.Contains(context.Item.CityId) ? Icons.Material.Filled.KeyboardArrowDown : Icons.Material.Filled.KeyboardArrowRight)"
+                                   Disabled="@(string.IsNullOrWhiteSpace(context.Item.Name) || _isFetchingCityInfo.Contains(context.Item.CityId))"
+                                   OnClick="() => OnHideShowDetailsClickAsync(context)"
+                                   Color="Color.Default"/>
+                </CellTemplate>
+            </TemplateColumn>
+        </div>
 
         <PropertyColumn Property="x => x.Name" Title="Name"/>
 
@@ -92,35 +103,18 @@
                 </CellTemplate>
             </TemplateColumn>
         </div>
-
     </Columns>
 
     <ChildRowContent>
         <MudCard>
             <MudCardHeader Class="py-1">
                 <CardHeaderContent>
-                    <div class="d-flex flex-row justify-space-between">
-                        <MudText Typo="Typo.h6">@context.Item.Name</MudText>
-                        <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Filled.Download" OnClick="_ => OnFetchExternalDataAsync(context.Item)" Color="Color.Primary"/>
-                    </div>
+                    <MudText Typo="Typo.h6">@context.Item.Name</MudText>
                 </CardHeaderContent>
             </MudCardHeader>
-
             <MudCardContent Class="py-2">
                 <div class="d-flex flex-column gap-4">
-                    @if (context.Item.Description.Count == 0)
-                    {
-                        <MudText Typo="Typo.body1">No description available.</MudText>
-                    }
-                    else
-                    {
-                        <MudText Typo="Typo.body1">
-                            @foreach (var part in context.Item.Description)
-                            {
-                                @part
-                            }
-                        </MudText>
-                    }
+                    <MudText Typo="Typo.body1">@(context.Item.Description.Any() ? string.Join("", context.Item.Description) : "No description available.")</MudText>
                     <div>
                         @if (context.Item.CurrentCondition is not null)
                         {
@@ -132,8 +126,8 @@
                                 <MudText>Wind Speed: @context.Item.CurrentCondition.WindSpeedKmph km/h</MudText>
                                 <MudText>Feels Like: @context.Item.CurrentCondition.FeelsLikeC °C</MudText>
 
-                                <MudText>Local Observation Time: @context.Item.CurrentCondition.LocalObservationTime</MudText>                                
-                                <MudText>Last Update: @context.Item.CurrentCondition.LastUpdate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</MudText>                                
+                                <MudText>Local Observation Time: @context.Item.CurrentCondition.LocalObservationTime</MudText>
+                                <MudText>Last Update: @context.Item.CurrentCondition.LastUpdate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</MudText>
                             </div>
                         }
                         else
@@ -145,7 +139,7 @@
             </MudCardContent>
         </MudCard>
     </ChildRowContent>
-    
+
     <PagerContent>
         <MudDataGridPager T="City"/>
     </PagerContent>
