@@ -1,7 +1,24 @@
 @page "/export"
+@using WeatherInTheCity.Cities
+@using WeatherInTheCity.Mail
 
-<h3>Export</h3>
+@inject ISnackbar Snackbar
+@inject CtxCitiesDb CtxCitiesDb
+@inject ILogger<Export> Logger
+@inject IMailService MailService
 
-@code {
-    
-}
+@rendermode InteractiveServer
+
+<div class="d-flex justify-center align-center flex-grow-1 mb-20">
+    <div class="d-flex flex-column gap-4">
+        <MudTextField
+            @bind-Value="_email"
+            Placeholder="email"
+            Adornment="Adornment.Start"
+            Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Email"
+            IconSize="Size.Medium"
+            Class="d-flex mud-width-full"/>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SendMailAsync">Send Cities data in csv format via Mail</MudButton>
+    </div>
+</div>

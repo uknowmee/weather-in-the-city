@@ -4,16 +4,9 @@ using SendGrid.Helpers.Mail;
 
 namespace WeatherInTheCity.Mail;
 
-public interface IAttachment
-{
-    public string Filename { get; }
-    public string MimeType { get; }
-    public string StringContent { get; }
-}
-
 public interface IMailService
 {
-    Task SendEmailAsync(string email, string subject, string htmlMessage, IAttachment[]? attachments = null);
+    Task SendEmailAsync(string email, string subject, string htmlMessage, IAttachment[]? attachments = null, CancellationToken cancellationToken = default);
 }
 
 public class MailService : IMailService
@@ -27,7 +20,7 @@ public class MailService : IMailService
         _sendGridOptions = options.Value;
     }
 
-    public async Task SendEmailAsync(string email, string subject, string htmlMessage, IAttachment[]? attachments = null)
+    public async Task SendEmailAsync(string email, string subject, string htmlMessage, IAttachment[]? attachments = null, CancellationToken cancellationToken = default)
     {
         var sendgridAttachments = attachments?
             .Select(attachment => new Attachment
@@ -39,15 +32,10 @@ public class MailService : IMailService
             })
             .ToList() ?? [];
 
-        await ExecuteSending(
-            subject,
-            htmlMessage,
-            email,
-            sendgridAttachments
-        );
+        await ExecuteSending(subject, htmlMessage, email, sendgridAttachments, cancellationToken);
     }
 
-    private async Task ExecuteSending(string subject, string message, string toEmail, List<Attachment> attachments)
+    private async Task ExecuteSending(string subject, string message, string toEmail, List<Attachment> attachments, CancellationToken cancellationToken = default)
     {
         var client = new SendGridClient(_sendGridOptions.Key);
         var msg = new SendGridMessage
@@ -61,7 +49,7 @@ public class MailService : IMailService
         msg.AddTo(new EmailAddress(toEmail));
 
         msg.SetClickTracking(false, false);
-        var response = await client.SendEmailAsync(msg);
+        var response = await client.SendEmailAsync(msg, cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
