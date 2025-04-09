@@ -32,6 +32,24 @@ Because app uses several external services, it might be hard to run it locally.
 For local development it might be beneficial to deploy [Postgresql](https://www.postgresql.org.pl/) and [Seq](https://datalust.co/seq) via Docker.
 Blazor app can run locally without Docker.
 
+- Create `appsettings.local.json` in [`src/WeatherInTheCity`](src/WeatherInTheCity) based on following template. Add your credentials.
+
+  ```json
+  {
+    "HygraphOptions": {
+      "Endpoint": "",
+      "Pat": ""
+    },
+    "SendGridOptions": {
+      "Key": "",
+      "EmailFrom": ""
+    },
+    "OpenAiOptions": {
+      "ApiKey": ""
+    }
+  }
+  ```
+
 ```bash
 docker compose -f docker compose -f compose/compose-services-dev.yaml up -d seq postgres
 ```
@@ -43,6 +61,18 @@ dotnet run --project src/WeatherInTheCity/WeatherInTheCity.csproj
 
 If you simply want to run the app and all needed services in Docker, you can use the following command.
 
+- When running app in Docker, instead af `appsetting.local.json` create `.local.env` file  in [`src/WeatherInTheCity`](src/WeatherInTheCity) based on following template. Add your credentials.
+
+  ```dotenv
+  CITIESDBOPTIONS__CONNECTIONSTRING=Host=postgres;Port=5432;Database=cities;Username=postgres;Password=postgrespw;
+  SEQOPTIONS__HOST=http://seq:80
+  HYGRAPHOPTIONS__ENDPOINT=
+  HYGRAPHOPTIONS__PAT=
+  SENDGRIDOPTIONS__KEY=
+  SENDGRIDOPTIONS__EMAILFROM=
+  OPENAIOPTIONS__APIKEY=
+  ```
+
 ```bash
 docker compose -f docker compose -f compose/compose-services.yaml up -d
 ```
@@ -50,5 +80,7 @@ docker compose -f docker compose -f compose/compose-services.yaml up -d
 ### Deployment
 
 App can be easily deployed via [Portainer](https://www.portainer.io/) as well. Use [Business Edition](https://www.portainer.io/install) or [portainer-ee](https://hub.docker.com/r/portainer/portainer-ee) image.
+
+Example [.env](.env/.example_prod.env) file for production deployment.
 
 Easiest way to serve app is to use [Caddy](https://caddyserver.com/) as web server.
