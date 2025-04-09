@@ -53,4 +53,7 @@ services:
       - "8080:8080"
     networks:
       - weather-in-the-city
+    depends_on:
+      - seq
+      - postgres
     restart: unless-stopped

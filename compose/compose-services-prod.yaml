@@ -60,4 +60,7 @@ services:
     networks:
       - weather-in-the-city-prod
       - caddy
+    depends_on:
+      - seq
+      - postgres
     restart: always
