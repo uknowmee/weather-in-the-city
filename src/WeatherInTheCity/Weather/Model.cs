@@ -2,24 +2,28 @@
 
 namespace WeatherInTheCity.Weather;
 
-public class WeatherResponse
+public record GenerateWeatherRequest(Guid CityId, string CityName);
+
+public record WeatherResponse([property: JsonPropertyName("current_condition")] CurrentCondition[] CurrentConditions)
 {
-    [JsonPropertyName("current_condition")]
-    public CurrentCondition[] CurrentConditions { get; set; } = [];
+    public WeatherResponse() : this([]) { }
 }
 
-public class CurrentCondition
+public record CurrentCondition(
+    [property: JsonPropertyName("localObsDateTime")] string LocalObservationTime,
+    [property: JsonPropertyName("temp_C")] string TempC,
+    [property: JsonPropertyName("weatherDesc")] WeatherDescription[] WeatherDescription,
+    [property: JsonPropertyName("humidity")] string Humidity,
+    [property: JsonPropertyName("windspeedKmph")] string WindSpeedKmph,
+    [property: JsonPropertyName("FeelsLikeC")] string FeelsLikeC
+)
 {
-    public DateTimeOffset LastUpdate { get; set; } = DateTimeOffset.UtcNow;
-    [JsonPropertyName("localObsDateTime")] public string LocalObservationTime { get; set; } = string.Empty;
-    [JsonPropertyName("temp_C")] public string TempC { get; set; } = string.Empty;
-    [JsonPropertyName("weatherDesc")] public WeatherDescription[] WeatherDescription { get; set; } = [];
-    [JsonPropertyName("humidity")] public string Humidity { get; set; } = string.Empty;
-    [JsonPropertyName("windspeedKmph")] public string WindSpeedKmph { get; set; } = string.Empty;
-    [JsonPropertyName("FeelsLikeC")] public string FeelsLikeC { get; set; } = string.Empty;
+    public CurrentCondition() : this(string.Empty, string.Empty, [], string.Empty, string.Empty, string.Empty) { }
+
+    public DateTimeOffset LastUpdate { get; init; } = DateTimeOffset.UtcNow;
 }
 
-public class WeatherDescription
+public record WeatherDescription([property: JsonPropertyName("value")] string Value)
 {
-    [JsonPropertyName("value")] public string Value { get; set; } = string.Empty;
+    public WeatherDescription() : this(string.Empty) { }
 }

@@ -3,18 +3,27 @@
 @using WeatherInTheCity.Cms
 
 @inject ICmsService CmsService
+@inject ILogger<Home> Logger
 
 <div class="d-flex flex-auto flex-column">
-    @_about?.Content.Html.AddStyles(_tagStyles).AsRenderFragment()
-    @if (_about?.KeyFeatures?.Html is not null)
+    @if (_about is null)
     {
-        <div class="mt-2 mt-sm-4">
-            <h3 class="mud-typography mud-typography-h5">Key Features:</h3>
-            <div class="px-4 mt-1 mt-sm-3">
-                @_about?.KeyFeatures?.Html.AddStyles(_tagStyles).AsRenderFragment()
-            </div>
-        </div>
+        <Loading/>
     }
+    else
+    {
+        @_about.Content.Html.AddStyles(_tagStyles).AsRenderFragment()
+        @if (_about.KeyFeatures?.Html is not null)
+        {
+            <div class="mt-2 mt-sm-4">
+                <h3 class="mud-typography mud-typography-h5">Key Features:</h3>
+                <div class="px-4 mt-1 mt-sm-3">
+                    @_about?.KeyFeatures?.Html.AddStyles(_tagStyles).AsRenderFragment()
+                </div>
+            </div>
+        }
+    }
+
 </div>
 
 <div>
@@ -59,7 +68,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _about = await CmsService.GetAppAbout();
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            _about = await CmsService.GetAppAboutAsync(cts.Token);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Error loading About");
+            const string failed = "<p>Failed to load content</p>";
+            _about = new About(failed, new Content(failed), new Content(failed));
+        }
     }
 
 }
