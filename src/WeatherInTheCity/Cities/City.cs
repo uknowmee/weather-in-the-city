@@ -58,4 +58,9 @@ public class City
     {
         return new City("", false, 0);
     }
+    
+    public static City Create(string name, bool isCapital, int population, DateOnly? foundationDate = null)
+    {
+        return new City(name, isCapital, population, foundationDate);
+    }
 }

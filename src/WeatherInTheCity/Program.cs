@@ -14,12 +14,12 @@ builder.AddBlazor()
     .AddMailService()
     .AddAiService()
     .AddWeatherService()
-    .AddDatabase<CtxCitiesDb, CitiesDbOptions>();
+    .AddCitiesServices();
 
 var app = builder.Build();
 
 app.UseBlazor()
     .UseFramework()
-    .CreateDatabase<CtxCitiesDb>();
+    .UseCitiesServices();
 
 app.Run();
